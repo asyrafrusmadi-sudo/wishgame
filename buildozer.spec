@@ -1,13 +1,35 @@
-[app]
-title = WISH Game
-package.name = wishgame
-package.domain = com.wish.game
-source.dir =.
-source.include_exts = py,png,jpg,kv,atlas
-version = 0.1
-requirements = python3,kivy
-orientation = portrait
+name: Build APK
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Buildozer
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.36
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wishgame-apk
+          path: bin/*.apk
